@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_safe, require_POST, require_http_methods
 from .models import Review, Comment
 from .forms import ReviewForm, CommentForm
-
+from django.http import JsonResponse
+from movies.models import Movie
 
 @require_safe
 def index(request):
@@ -20,6 +21,8 @@ def create(request):
         if form.is_valid():
             review = form.save(commit=False)
             review.user = request.user
+            mm = Movie.objects.get(pk = form.data['movie_title'])
+            review.movies = mm.title
             review.save()
             return redirect('community:detail', review.pk)
     else:
@@ -69,7 +72,13 @@ def like(request, review_pk):
 
         if review.like_users.filter(pk=user.pk).exists():
             review.like_users.remove(user)
+            like_user = False
         else:
             review.like_users.add(user)
-        return redirect('community:index')
+            like_user = True
+        context = {
+            'like_user': like_user,
+            'likes_count' : review.like_users.count(),
+        }
+        return JsonResponse(context)
     return redirect('accounts:login')
