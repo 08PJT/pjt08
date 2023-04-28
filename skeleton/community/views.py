@@ -50,11 +50,16 @@ def detail(request, review_pk):
 def create_comment(request, review_pk):
     review = get_object_or_404(Review, pk=review_pk)
     comment_form = CommentForm(request.POST)
+    parent_pk = request.POST.get('parent_pk')
     if comment_form.is_valid():
         comment = comment_form.save(commit=False)
         comment.review = review
         comment.user = request.user
         comment.save()
+
+        if parent_pk :
+            parent_commnet = Comment.objects.get(pk=parent_pk)
+            comment.parent = parent_commnet
         return redirect('community:detail', review.pk)
     context = {
         'comment_form': comment_form,
@@ -62,7 +67,6 @@ def create_comment(request, review_pk):
         'comments': review.comment_set.all(),
     }
     return render(request, 'community/detail.html', context)
-
 
 @require_POST
 def like(request, review_pk):
