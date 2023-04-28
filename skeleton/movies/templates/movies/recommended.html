@@ -10,7 +10,7 @@
     {% endfor %}
   </select>
   <hr>
-  
+
   {% for movie in movies_list %}
     <h5>영화 제목: <a href="{% url 'movies:detail' movie.pk%}">{{ movie.title }}</a></h5>
     <p>개봉일: {{ movie.release_date }}</p>
@@ -27,14 +27,26 @@
     
 {% endblock %}
 
-
 {% block script %}
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
-    function changeValue() {
-        var selectedOption = document.getElementById("genre_select").value;
-        window.location.href = window.location.href.split("?")[0] + "?genre=" + selectedOption;
-      }
+  function changeValue() {
+    let selectedOption = document.getElementById("genre_select").value
+    axios({
+        method : 'get',
+        url : 'http://127.0.0.1:8000/movies/recommended/',
+        params: {
+            genre: selectedOption
+        }
+    })
+    .then(function (response) {
+        const data = response.data
+        document.getElementsByTagName("body")[0].innerHTML = data
+    })
+    .catch(function (error) {
+        console.log(error);
+    });
+}
   </script>
     
 {% endblock script %}

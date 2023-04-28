@@ -37,17 +37,24 @@ def detail(request, movie_pk):
 
 @require_safe
 def recommended(request):
+    context = {
+        
+    }
     selected_genre = request.GET.get('genre')
     print(selected_genre)
-    movies_list = Movie.objects.all().order_by('-vote_average')[:10]
-    # if selected_genre:
-    #     movies_list = movies_list.filter(genres__name=selected_genre)
-    
     genres = Genre.objects.all()
-    context = {
-        'movies_list': movies_list,
-        'genres': genres,
-    }
+    if selected_genre:
+        check = Genre.objects.get(id = selected_genre)
+        print(check)
+        for genre in genres:
+            if genre == check:
+                context['genre.name'] = genre.name
+    movies_list = Movie.objects.all().order_by('-vote_average')[:10]
+    if selected_genre:
+        movies_list = Movie.objects.all().filter(genres__pk = selected_genre)
+    context['movies_list'] = movies_list
+    context['genres'] = genres
+    print(context)
     return render(request, 'movies/recommended.html', context)
 
 @require_POST
