@@ -1,8 +1,9 @@
-from django.shortcuts import render, redirect, HttpResponse
-from django.views.decorators.http import require_safe
+from django.shortcuts import render, redirect, HttpResponse, get_object_or_404
+from django.views.decorators.http import require_safe, require_POST
 from .models import Genre, Movie
 from .serializers import GenreSerializer, MovieSerializer
 from rest_framework.response import Response
+from django.http import JsonResponse
 
 # Create your views here.
 @require_safe
@@ -36,13 +37,34 @@ def detail(request, movie_pk):
 
 @require_safe
 def recommended(request):
-    movies = Movie.objects.all()
-    vote_order = movies.order_by('-vote_average')[:10]
-    popularity_order = movies.order_by('-popularity')[:10]
-    choice = []
-    for i, j in zip(vote_order, popularity_order):
-        choice.append((i, j))
+    selected_genre = request.GET.get('genre')
+    print(selected_genre)
+    movies_list = Movie.objects.all().order_by('-vote_average')[:10]
+    # if selected_genre:
+    #     movies_list = movies_list.filter(genres__name=selected_genre)
+    
+    genres = Genre.objects.all()
     context = {
-        'choices' : choice,
+        'movies_list': movies_list,
+        'genres': genres,
     }
     return render(request, 'movies/recommended.html', context)
+
+@require_POST
+def like(request, movie_pk):
+    if request.user.is_authenticated:
+        movie = get_object_or_404(Movie, pk=movie_pk)
+        user = request.user
+
+        if movie.like_users.filter(pk=user.pk).exists():
+            movie.like_users.remove(user)
+            like_movie = False
+        else:
+            movie.like_users.add(user)
+            like_movie = True
+        context = {
+            'like_movie': like_movie,
+            'likes_count' : movie.like_users.count(),
+        }
+        return JsonResponse(context)
+    return redirect('accounts:login')

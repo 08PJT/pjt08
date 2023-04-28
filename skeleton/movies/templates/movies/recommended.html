@@ -1,17 +1,40 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    {% for movie1, movie2 in choices %}
-        평점순 {{ forloop.counter }}위
-        <br>
-        title : 
-        <a href="{% url 'movies:detail' movie1.pk %}">{{movie1.title}}</a>
-        <br>
-        인기순 {{ forloop.counter }}위
-        <br>
-        title : 
-        <a href="{% url 'movies:detail' movie2.pk %}">{{movie2.title}}</a>
-        <br>
-        <hr>
+  <h1>Recommended Movies</h1>
+  <label for="genre_select">추천 기준</label>
+  <select id="genre_select" onchange="changeValue()">
+    <option value="vote_count">인기순</option>
+    {% for genre in genres %}
+      <option value="{{ genre.pk }}">{{ genre.name }}</option>
     {% endfor %}
+  </select>
+  <hr>
+  
+  {% for movie in movies_list %}
+    <h5>영화 제목: <a href="{% url 'movies:detail' movie.pk%}">{{ movie.title }}</a></h5>
+    <p>개봉일: {{ movie.release_date }}</p>
+    <p>평점: {{ movie.vote_average }}</p>
+    <p>장르: 
+      {% for genre in movie.genres.all %}
+      {{ genre.name }}{% if not forloop.last %}, {% endif %}
+      {% endfor %}
+    </p>
+
+    <hr>
+
+  {% endfor %}
+    
 {% endblock %}
+
+
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    function changeValue() {
+        var selectedOption = document.getElementById("genre_select").value;
+        window.location.href = window.location.href.split("?")[0] + "?genre=" + selectedOption;
+      }
+  </script>
+    
+{% endblock script %}

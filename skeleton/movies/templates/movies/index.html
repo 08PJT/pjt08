@@ -4,6 +4,55 @@
   <h1>Movies</h1>
   {% for movie in movies %}
     <a href="{% url 'movies:detail' movie.pk %}">{{movie.title}}</a>
-    <hr>
+
+    <form class="like-forms" data-movie-id="{{ movie.pk }}">
+        {% csrf_token %}
+        {% if movie.like in movie.like_user.all %}
+          <input type="submit" value="좋아요 취소" id="like-{{movie.pk}}">
+        {% else %}
+          <input type="submit" value="좋아요" id="like-{{movie.pk}}">
+        {% endif %}
+      </form>
+      <p>
+        <span id="like-count-{{movie.pk}}">{{ movie.like_users.all|length }}</span> 명이 이 영화을 좋아합니다.
+      </p>
+      <hr>
   {% endfor %}
+
 {% endblock %}
+
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+  const forms = document.querySelectorAll('.like-forms')
+  const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
+
+  forms.forEach((form) => {
+    form.addEventListener('submit', function (event) {
+      event.preventDefault()
+        
+      const movieId = event.target.dataset.movieId
+
+      axios({
+        method: 'post',
+        url: `/movies/${movieId}/like/`,
+        headers: {'X-CSRFToken': csrftoken},
+      })
+      .then((response) => {
+        const likeUser = response.data.like_movie
+        const likeBtn = document.querySelector(`#like-${movieId}`)
+        const likesCountTag = document.querySelector(`#like-count-${movieId}`)
+        const likesCount = response.data.likes_count
+
+        likesCountTag.innerText = likesCount
+
+        if (likeUser === true) {
+          likeBtn.value = '좋아요 취소'
+        } else {
+          likeBtn.value = '좋아요'
+        }
+      })
+    })
+  })
+</script>
+{% endblock script %}

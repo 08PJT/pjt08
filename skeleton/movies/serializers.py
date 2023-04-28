@@ -7,7 +7,6 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = '__all__'
         
 class MovieSerializer(serializers.ModelSerializer):
-    # name = GenreSerializer(read_only=True, source='genre_set')
     class Meta:
         model = Movie
         fields = '__all__'
