@@ -1,4 +1,26 @@
 {% extends 'base.html' %}
 
 {% block content %}
+    <br>
+    <hr>
+    title : {{data.title}}
+    <hr>
+    release_date : {{data.release_date}}
+    <hr>
+    popularity : {{data.popularity}}
+    <hr>
+    vote_count : {{data.vote_count}}
+    <hr>
+    vote_average : {{data.vote_average}}
+    <hr>
+    overview : {{data.overview}}
+    <hr>
+    poster_path : {{data.poster_path}}
+    <br><br>
+    <img src="{{data.poster_path}}" alt="" srcset="">
+    <hr>
+    names :
+    {% for name in data.names %}
+        {{ name }},
+    {% endfor %}
 {% endblock %}
