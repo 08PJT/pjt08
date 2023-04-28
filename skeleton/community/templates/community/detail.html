@@ -16,12 +16,31 @@
     <p><b>{{ comments|length }}개의 댓글이 있습니다.</b></p>
   {% endif %}
   {% for comment in comments %}
+  
     <div>
-      {{ comment.user }} - {{ comment.content }}
+      {{ comment.pk }}번 댓글 {{ comment.user }} - {{ comment.content }}
     </div>
+    <hr>
+    {% if comment.replies.all %}
+    <p>대댓글</p>
+    
+  {% for reply in comment.replies.all %}
+  <p>{{ reply.content }}</p>
+  {% endfor %}
+  <hr>
+  {% endif %}
+
+
   {% empty %}
     <p><b>댓글이 없어요..</b></p>
+  
   {% endfor %}
+  <form action="{% url 'community:create_comment' review.pk %}" method="post">
+    <input type="hidden" name="parent_pk" value="{{ parent_pk }}">
+    {% csrf_token %}
+    <input type="submit" value="대댓글">
+    
+  </form>
   <hr>
   {% if user.is_authenticated %}
     <form action="{% url 'community:create_comment' review.pk %}" method="POST">
@@ -32,5 +51,6 @@
   {% else %}
     <a href="{% url 'accounts:login' %}">[댓글을 작성하려면 로그인하세요.]</a>
   {% endif %}
+
   <a href="{% url 'community:index' %}">[back]</a>
 {% endblock  %}
