@@ -1,4 +1,17 @@
 {% extends 'base.html' %}
 
 {% block content %}
+    {% for movie1, movie2 in choices %}
+        평점순 {{ forloop.counter }}위
+        <br>
+        title : 
+        <a href="{% url 'movies:detail' movie1.pk %}">{{movie1.title}}</a>
+        <br>
+        인기순 {{ forloop.counter }}위
+        <br>
+        title : 
+        <a href="{% url 'movies:detail' movie2.pk %}">{{movie2.title}}</a>
+        <br>
+        <hr>
+    {% endfor %}
 {% endblock %}
